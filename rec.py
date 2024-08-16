@@ -8,9 +8,14 @@ from notion_client import Client
 
 # 環境変数のロード
 load_dotenv()
-NOTION_API_KEY = "secret_Br4zDnItaFNJ1SzXN98Q4AaNghLDMbXbEL9YCJrCV69"
-DATABASE_ID = "fdac624265ef4279b6856e7026517fdc"
+# Streamlit Secrets または環境変数から値を取得
+NOTION_API_KEY = st.secrets["NOTION_API_KEY"] if "NOTION_API_KEY" in st.secrets else os.environ.get("NOTION_API_KEY")
+DATABASE_ID = st.secrets["DATABASE_ID"] if "DATABASE_ID" in st.secrets else os.environ.get("DATABASE_ID")
 
+# 環境変数が設定されていることを確認
+if not NOTION_API_KEY or not DATABASE_ID:
+    st.error("Notion API Key または Database ID が設定されていません。")
+    st.stop()
 # Notion APIクライアントを初期化
 notion = Client(auth=NOTION_API_KEY)
 
