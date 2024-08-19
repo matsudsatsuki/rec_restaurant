@@ -102,7 +102,7 @@ def item_based_recommendation(restaurant, n=3):
     return user_item_matrix.columns[similar_items][:n].tolist()
 
 # Streamlitアプリ
-st.title('レストランレコメンデーションアプリ')
+st.title('PFD部おすすめごはん')
 
 # データテーブルの表示
 st.subheader("レストランデータ")
@@ -124,6 +124,16 @@ if st.button('ユーザーベースの推薦を表示'):
         restaurant_info = df[df['店名'] == restaurant].iloc[0]
         st.write(f"- {restaurant_info['店名']} ({restaurant_info['タグ']}) - {restaurant_info['店舗最寄り駅']}駅")
         st.write(f"  URL: {restaurant_info['URL']}")
+    
+    st.markdown("""
+    <details>
+    <summary>レコメンドの仕組み</summary>
+    <p style="font-size: 0.9em; color: #666;">
+    このレコメンドは、あなたと似たお店の好みを持つユーザーが推薦しているレストランを表示しています。
+    具体的には、コサイン類似度を使用してユーザー間の類似性を計算し、最も似ている上位5人のユーザーが推薦したレストランを抽出しています。
+    </p>
+    </details>
+    """, unsafe_allow_html=True)
 
 # アイテムベースの推薦
 if st.button('アイテムベースの推薦を表示'):
@@ -133,3 +143,14 @@ if st.button('アイテムベースの推薦を表示'):
         restaurant_info = df[df['店名'] == restaurant].iloc[0]
         st.write(f"- {restaurant_info['店名']} ({restaurant_info['タグ']}) - {restaurant_info['店舗最寄り駅']}駅")
         st.write(f"  URL: {restaurant_info['URL']}")
+    
+    st.markdown("""
+    <details>
+    <summary>レコメンドの仕組み</summary>
+    <p style="font-size: 0.9em; color: #666;">
+    このレコメンドは、選択されたレストランと似た特徴を持つ他のレストランを表示しています。
+    具体的には、コサイン類似度を使用してレストラン間の類似性を計算し、最も似ている上位5つのレストランを抽出しています。
+    類似性は、それぞれのレストランを推薦しているユーザーの重なりに基づいて判断されます。
+    </p>
+    </details>
+    """, unsafe_allow_html=True)
