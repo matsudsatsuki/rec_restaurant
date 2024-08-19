@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 from dotenv import load_dotenv
 from notion_client import Client
+import random
 
 # 環境変数のロード
 load_dotenv()
@@ -77,29 +78,33 @@ user_item_matrix = user_item_matrix.div(user_item_matrix.sum(axis=1), axis=0)
 user_similarity = cosine_similarity(user_item_matrix)
 item_similarity = cosine_similarity(user_item_matrix.T)
 
-# ユーザーベースの推薦
+# ユーザーベースの推薦（ランダム性を追加）
 def user_based_recommendation(user, n=3):
     if user not in user_item_matrix.index:
         return []
     
     user_index = user_item_matrix.index.get_loc(user)
-    similar_users = user_similarity[user_index].argsort()[::-1][1:6]  # 上位5人の類似ユーザー
+    similar_users = user_similarity[user_index].argsort()[::-1][1:11]  # 上位10人の類似ユーザー
     
     recommendations = user_item_matrix.iloc[similar_users].mean().sort_values(ascending=False)
     already_liked = user_item_matrix.loc[user]
     recommendations = recommendations[recommendations.index.difference(already_liked[already_liked > 0].index)]
     
-    return recommendations.head(n).index.tolist()
+    # 上位10件からランダムに選択
+    top_recommendations = recommendations.head(10).index.tolist()
+    return random.sample(top_recommendations, min(n, len(top_recommendations)))
 
-# アイテムベースの推薦
+# アイテムベースの推薦（ランダム性を追加）
 def item_based_recommendation(restaurant, n=3):
     if restaurant not in user_item_matrix.columns:
         return []
     
     item_index = user_item_matrix.columns.get_loc(restaurant)
-    similar_items = item_similarity[item_index].argsort()[::-1][1:6]  # 上位5個の類似アイテム
+    similar_items = item_similarity[item_index].argsort()[::-1][1:11]  # 上位10個の類似アイテム
     
-    return user_item_matrix.columns[similar_items][:n].tolist()
+    # 上位10件からランダムに選択
+    top_recommendations = user_item_matrix.columns[similar_items].tolist()
+    return random.sample(top_recommendations, min(n, len(top_recommendations)))
 
 # Streamlitアプリ
 st.title('PFD部おすすめごはん')
@@ -130,7 +135,8 @@ if st.button('ユーザーベースの推薦を表示'):
     <summary>レコメンドの仕組み</summary>
     <p style="font-size: 0.9em; color: #666;">
     このレコメンドは、あなたと似たお店の好みを持つユーザーが推薦しているレストランを表示しています。
-    具体的には、コサイン類似度を使用してユーザー間の類似性を計算し、最も似ている上位5人のユーザーが推薦したレストランを抽出しています。
+    具体的には、コサイン類似度を使用してユーザー間の類似性を計算し、最も似ている上位10人のユーザーが推薦したレストランから、
+    ランダムに3つを選んで表示しています。これにより、毎回少し異なる推薦結果が得られます。
     </p>
     </details>
     """, unsafe_allow_html=True)
@@ -149,7 +155,8 @@ if st.button('アイテムベースの推薦を表示'):
     <summary>レコメンドの仕組み</summary>
     <p style="font-size: 0.9em; color: #666;">
     このレコメンドは、選択されたレストランと似た特徴を持つ他のレストランを表示しています。
-    具体的には、コサイン類似度を使用してレストラン間の類似性を計算し、最も似ている上位5つのレストランを抽出しています。
+    具体的には、コサイン類似度を使用してレストラン間の類似性を計算し、最も似ている上位10個のレストランから、
+    ランダムに3つを選んで表示しています。これにより、毎回少し異なる推薦結果が得られます。
     類似性は、それぞれのレストランを推薦しているユーザーの重なりに基づいて判断されます。
     </p>
     </details>
